@@ -44,19 +44,12 @@ function readBytesCounter(table, ip){
 }
 
 // obtain adress of peers in local network
-function getIpAdressOfPeer(){
-  bash_command = "arp-scan --interface=ap0 --localnet | grep 192 | awk  '{print $1}'"
-  return
-      cmd.get(
-        bash_command,
-        function(err, data, stderr){
-          console.log(data);
-        }
-      );
+function getIpAdressOfPeer(cb){
+cmd.get(
+        "arp-scan --interface=ap0 --localnet | grep 192 | awk  '{print $1}'",
+		cb
+    );
 }
-
-
-
 
 // 1. drop everything apart from etherscan
 ipt.set_policy("FORWARD", "DROP", (err) => showErr(err));
@@ -64,12 +57,21 @@ ipt.flush("FORWARD", (err) => showErr(err));
 allowAdress("104.25.244.14");
 
 // 2. create an exception for IP address X
-var ipPeer = getIpAdressOfPeer()
-console.log("Ip address give: " + ipPeer)
-setTimeout(function(){
-  console.log("Hello");
-  allowAdress(ipPeer)
-}, 30000);
+let ipPeer;
+getIpAdressOfPeer(        function(err, data, stderr){
+            ipPeer = data;
+            console.log('the current working dir is : ',ipPeer)
+        })
+        
+            //var cmd=require('node-cmd');
+
+
+    
+
+//setTimeout(function(){
+//  console.log("Hello");
+//  allowAdress(ipPeer)
+//}, 30000);
 
 // 3. if traffic from IP adress X exceed Y, delete the exception
 

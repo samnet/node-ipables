@@ -1,0 +1,24 @@
+{
+  "name": "iptables",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samnet/node-ipables.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samnet/node-ipables/issues"
+  },
+  "homepage": "https://github.com/samnet/node-ipables#readme",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "node-cmd": "^3.0.0",
+    "tesserarius": "^0.3.2"
+  }
+}

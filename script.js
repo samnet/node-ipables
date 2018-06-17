@@ -1,9 +1,11 @@
 const Tesserarius = require("tesserarius");
-const ipt = new Tesserarius();
 const cmd = require('node-cmd');
+const Bluebird = require('bluebird');
+
+const ipt = new Tesserarius();
+const getAsync = Bluebird.promisify(cmd.get, { multiArgs: true, context: cmd })
 
 function showErr(err) {console.log(err);}
-
 
 function allowAdress(anIP) { // create a new rule to allow specific traffic
   const ruleSrc = {
@@ -32,23 +34,16 @@ function dropAdress(anIP) { // delete existing rule.. does not create new ones
 }
 
 // reading current counter for given address
-function readBytesCounter(table, ip){
-  bash_command = "iptables -L " + table;
+function readBytesCounter(table, ip) {
+  let bash_command = "iptables -L " + table;
   bash_command += "  -n -v -x | grep " + ip + "0.0.0.0 | awk  '{print $2}'"
-  cmd.get(
-    bash_command,
-    function(err, data, stderr){
-      return(data);
-    }
-  );
+  getAsync(bash_command);
 }
 
 // obtain adress of peers in local network
-function getIpAdressOfPeer(cb){
-cmd.get(
-        "arp-scan --interface=ap0 --localnet | grep 192 | awk  '{print $1}'",
-		cb
-    );
+function getIpAdressOfPeer(){
+  const arpCmd = "arp-scan --interface=ap0 --localnet | grep 192 | awk  '{print $1}'";
+  return getAsync(arpCmd);
 }
 
 // 1. drop everything apart from etherscan
@@ -57,21 +52,15 @@ ipt.flush("FORWARD", (err) => showErr(err));
 allowAdress("104.25.244.14");
 
 // 2. create an exception for IP address X
-let ipPeer;
-getIpAdressOfPeer(        function(err, data, stderr){
-            ipPeer = data;
-            console.log('the current working dir is : ',ipPeer)
-        })
-        
-            //var cmd=require('node-cmd');
-
-
-    
-
-//setTimeout(function(){
-//  console.log("Hello");
-//  allowAdress(ipPeer)
-//}, 30000);
+getIpAdressOfPeer()
+  .then(data => {
+    console.log('ipPeer', data);
+    return data;
+  })
+  .then(ipPeer => {
+    return readBytesCounter(ipPeer)
+  })
+ 
 
 // 3. if traffic from IP adress X exceed Y, delete the exception
 
